@@ -61,6 +61,18 @@ class PowerDistribution:
         # Motor thrust storage [num_envs, 4]
         self.motor_thrust = torch.zeros(num_envs, 4, device=device)
 
+        # Mixing matrix for torque reconstruction (right-hand frame: +X fwd, +Y left, +Z up)
+        # Rows: roll, pitch, yaw ; Cols: M1 M2 M3 M4
+        self._torque_mix = torch.tensor(
+            [
+                [-1.0, -1.0, 1.0, 1.0],   # Tx = a*(-F1 - F2 + F3 + F4)
+                [-1.0,  1.0, 1.0, -1.0],   # Ty = a*(-F1 + F2 + F3 - F4)  (pitch sign aligned to RH coords)
+                [-1.0,  1.0, -1.0, 1.0],   # Tz = k*(-F1 + F2 - F3 + F4)
+            ],
+            device=device,
+        )
+        self._torque_scale = torch.tensor([self.arm, self.arm, self.thrust2torque], device=device)
+
     def set_idle_thrust(self, idle_thrust: int):
         """Set idle thrust (for arming)."""
         self.idle_thrust = idle_thrust
@@ -102,15 +114,11 @@ class PowerDistribution:
         r = roll / 2.0
         p = pitch / 2.0
 
-        # Match firmware powerDistributionLegacy() exactly:
-        # m1 = thrust - r + p + yaw
-        # m2 = thrust - r - p - yaw
-        # m3 = thrust + r - p + yaw
-        # m4 = thrust + r + p - yaw
-        m1 = thrust - r + p + yaw
-        m2 = thrust - r - p - yaw
-        m3 = thrust + r - p + yaw
-        m4 = thrust + r + p - yaw
+        # The original firmware has a different sign convention for pitch, so we invert it here for standard right-hand coordinates which is used throughout the isaac-sim based simulator.
+        m1 = thrust - r - p + yaw
+        m2 = thrust - r + p - yaw
+        m3 = thrust + r + p + yaw
+        m4 = thrust + r - p - yaw
 
         return torch.stack([m1, m2, m3, m4], dim=1)
 
@@ -209,23 +217,11 @@ class PowerDistribution:
                 \\       /
                  \\     /
                   \\   /
-                   X  --> +Y (left)
+     (left) <-- +Y  X
                   / \\
                  /   \\
             M3 (CCW)   M2 (CW)
                  Rear (-X)
-
-        Derived from firmware force/torque to motor mapping:
-            F0 = T/4 - Tx/(4a) - Ty/(4a) - Tz/(4k)  (M1)
-            F1 = T/4 - Tx/(4a) + Ty/(4a) + Tz/(4k)  (M2)
-            F2 = T/4 + Tx/(4a) + Ty/(4a) - Tz/(4k)  (M3)
-            F3 = T/4 + Tx/(4a) - Ty/(4a) + Tz/(4k)  (M4)
-
-        Inverse (motor forces to torques):
-            T  = F0 + F1 + F2 + F3
-            Tx = a * (-F0 - F1 + F2 + F3)
-            Ty = a * (-F0 + F1 + F2 - F3)
-            Tz = k * (-F0 + F1 - F2 + F3)
 
         Args:
             motor_thrust_pwm: Motor thrust [num_envs, 4] in 0-65535 scale
@@ -245,35 +241,8 @@ class PowerDistribution:
         force = torch.zeros(self.num_envs, 3, device=self.device)
         force[:, 2] = total_thrust
 
-        # Torques from motor force differences (inverse of firmware mixing)
-        # Roll torque (Tx): around body X-axis
-        # Tx = arm * (-F0 - F1 + F2 + F3)
-        torque_x = self.arm * (
-            -motor_force[:, 0]  # -M1
-            - motor_force[:, 1]  # -M2
-            + motor_force[:, 2]  # +M3
-            + motor_force[:, 3]  # +M4
-        )
-
-        # Pitch torque (Ty): around body Y-axis
-        # Ty = arm * (-F0 + F1 + F2 - F3)
-        torque_y = self.arm * (
-            -motor_force[:, 0]  # -M1
-            + motor_force[:, 1]  # +M2
-            + motor_force[:, 2]  # +M3
-            - motor_force[:, 3]  # -M4
-        )
-
-        # Yaw torque (Tz): around body Z-axis
-        # Tz = k * (-F0 + F1 - F2 + F3)
-        torque_z = self.thrust2torque * (
-            -motor_force[:, 0]  # -M1 (CW)
-            + motor_force[:, 1]  # +M2 (CCW)
-            - motor_force[:, 2]  # -M3 (CW)
-            + motor_force[:, 3]  # +M4 (CCW)
-        )
-
-        torque = torch.stack([torque_x, torque_y, torque_z], dim=1)
+        # Torques from motor force differences (right-hand frame, matches legacy_to_motor_thrust pitch inversion)
+        torque = (motor_force @ self._torque_mix.transpose(0, 1)) * self._torque_scale
 
         return force, torque
 

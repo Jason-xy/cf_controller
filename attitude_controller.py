@@ -231,10 +231,9 @@ class AttitudeController:
         pitch_desired = attitude_desired[:, 1]
         yaw_desired = attitude_desired[:, 2]
 
-        # Note: Firmware uses gyro.x for roll rate, -gyro.y for pitch rate, gyro.z for yaw rate
         # This handles the body frame convention
         roll_rate_actual = gyro[:, 0]
-        pitch_rate_actual = -gyro[:, 1]  # Inverted in firmware
+        pitch_rate_actual = gyro[:, 1]
         yaw_rate_actual = gyro[:, 2]
         self.last_rate_actual = torch.stack(
             [roll_rate_actual, pitch_rate_actual, yaw_rate_actual], dim=1

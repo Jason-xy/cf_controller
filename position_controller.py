@@ -257,8 +257,7 @@ class PositionController:
         )
 
         # Velocity PID for roll and pitch
-        # Note: firmware has negative sign for these
-        pitch_desired = -self.pid_vx.update_with_setpoint(setpoint_velocity[:, 0], state_body_vx, False)
+        pitch_desired = self.pid_vx.update_with_setpoint(setpoint_velocity[:, 0], state_body_vx, False)
         roll_desired = -self.pid_vy.update_with_setpoint(setpoint_velocity[:, 1], state_body_vy, False)
 
         # Constrain roll/pitch
