@@ -85,14 +85,14 @@ PID_YAW_RATE_INTEGRATION_LIMIT = 166.7
 # =============================================================================
 
 # Roll attitude PID
-PID_ROLL_KP = 6.0
+PID_ROLL_KP = 15.0
 PID_ROLL_KI = 3.0
 PID_ROLL_KD = 0.0
 PID_ROLL_KFF = 0.0
 PID_ROLL_INTEGRATION_LIMIT = 20.0
 
 # Pitch attitude PID
-PID_PITCH_KP = 6.0
+PID_PITCH_KP = 15.0
 PID_PITCH_KI = 3.0
 PID_PITCH_KD = 0.0
 PID_PITCH_KFF = 0.0
