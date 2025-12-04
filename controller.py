@@ -48,6 +48,7 @@ class CrazyflieController:
         device: torch.device,
         attitude_dt: float = config.ATTITUDE_UPDATE_DT,
         position_dt: float = config.POSITION_UPDATE_DT,
+        enable_debug: bool = False,
     ):
         """
         Initialize the complete controller.
@@ -62,6 +63,7 @@ class CrazyflieController:
         self.device = device
         self.attitude_dt = attitude_dt
         self.position_dt = position_dt
+        self.enable_debug = enable_debug
 
         # Control mode per environment
         self.control_mode = torch.full(
@@ -86,7 +88,7 @@ class CrazyflieController:
         # Step counter for rate limiting
         self.step_counter = 0
 
-        # Debug storage for external tools
+        # Debug storage for external tools (opt-in to avoid per-step clones)
         self.last_debug = {}
 
     def reset(
@@ -381,25 +383,26 @@ class CrazyflieController:
             thrust, roll_cmd, pitch_cmd, yaw_cmd
         )
 
-        # Store debug info for external viewers
-        self.last_debug = {
-            "attitude_desired": attitude_desired.detach().clone(),
-            "attitude": attitude.detach().clone(),
-            "gyro": gyro.detach().clone(),
-            "rate_desired": getattr(self.attitude_controller, "last_rate_desired", None),
-            "rate_actual": getattr(self.attitude_controller, "last_rate_actual", None),
-            "roll_cmd": roll_cmd.detach().clone(),
-            "pitch_cmd": pitch_cmd.detach().clone(),
-            "yaw_cmd": yaw_cmd.detach().clone(),
-            "thrust_pwm": thrust.detach().clone(),
-            "motor_pwm": self.power_distribution.motor_thrust.detach().clone(),
-            "force": force.detach().clone(),
-            "torque": torque.detach().clone(),
-            "position_setpoint": getattr(self.position_controller, "last_position_setpoint", None),
-            "position": getattr(self.position_controller, "last_position", None),
-            "velocity_setpoint": getattr(self.position_controller, "last_velocity_setpoint", None),
-            "velocity": getattr(self.position_controller, "last_velocity", None),
-        }
+        # Store debug info for external viewers when enabled.
+        if self.enable_debug:
+            self.last_debug = {
+                "attitude_desired": attitude_desired.detach().clone(),
+                "attitude": attitude.detach().clone(),
+                "gyro": gyro.detach().clone(),
+                "rate_desired": getattr(self.attitude_controller, "last_rate_desired", None),
+                "rate_actual": getattr(self.attitude_controller, "last_rate_actual", None),
+                "roll_cmd": roll_cmd.detach().clone(),
+                "pitch_cmd": pitch_cmd.detach().clone(),
+                "yaw_cmd": yaw_cmd.detach().clone(),
+                "thrust_pwm": thrust.detach().clone(),
+                "motor_pwm": self.power_distribution.motor_thrust.detach().clone(),
+                "force": force.detach().clone(),
+                "torque": torque.detach().clone(),
+                "position_setpoint": getattr(self.position_controller, "last_position_setpoint", None),
+                "position": getattr(self.position_controller, "last_position", None),
+                "velocity_setpoint": getattr(self.position_controller, "last_velocity_setpoint", None),
+                "velocity": getattr(self.position_controller, "last_velocity", None),
+            }
 
         self.step_counter += 1
 
