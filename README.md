@@ -163,16 +163,16 @@ These are documented in `config.py` with `NOTE:` comments.
 ### Motor Layout
 X-configuration (viewed from above, body ENU: +X forward, +Y left):
 ```
-          Front (+X)
-    M4 (CW)     M1 (CCW)
-         \       /
-          \     /
-           \   /
-            X  --> +Y (left)
-           / \
-          /   \
-    M3 (CCW)   M2 (CW)
-         Rear (-X)
+                 Front (+X)
+            M4 (CW)     M1 (CCW)
+                \\       /
+                 \\     /
+                  \\   /
+     (left) <-- +Y  X
+                  / \\
+                 /   \\
+            M3 (CCW)   M2 (CW)
+                 Rear (-X)
 ```
 
 ### Control Flow
