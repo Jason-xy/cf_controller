@@ -85,14 +85,14 @@ PID_YAW_RATE_INTEGRATION_LIMIT = 166.7
 # =============================================================================
 
 # Roll attitude PID
-PID_ROLL_KP = 15.0
+PID_ROLL_KP = 20.0
 PID_ROLL_KI = 3.0
 PID_ROLL_KD = 0.0
 PID_ROLL_KFF = 0.0
 PID_ROLL_INTEGRATION_LIMIT = 20.0
 
 # Pitch attitude PID
-PID_PITCH_KP = 15.0
+PID_PITCH_KP = 20.0
 PID_PITCH_KI = 3.0
 PID_PITCH_KD = 0.0
 PID_PITCH_KFF = 0.0
@@ -113,19 +113,19 @@ YAW_MAX_DELTA = 0.0
 # =============================================================================
 
 # Position X PID
-PID_POS_X_KP = 1.9
+PID_POS_X_KP = 5.0
 PID_POS_X_KI = 0.1
 PID_POS_X_KD = 0.0
 PID_POS_X_KFF = 0.0
 
 # Position Y PID
-PID_POS_Y_KP = 1.9
+PID_POS_Y_KP = 5.0
 PID_POS_Y_KI = 0.1
 PID_POS_Y_KD = 0.0
 PID_POS_Y_KFF = 0.0
 
 # Position Z PID
-PID_POS_Z_KP = 1.6
+PID_POS_Z_KP = 4.0
 PID_POS_Z_KI = 0.5
 PID_POS_Z_KD = 0.0
 PID_POS_Z_KFF = 0.0
@@ -140,21 +140,21 @@ PID_POS_VEL_Z_MAX = 1.0
 # =============================================================================
 
 # Velocity X PID
-PID_VEL_X_KP = 25.0
-PID_VEL_X_KI = 1.0
+PID_VEL_X_KP = 100.0
+PID_VEL_X_KI = 3.0
 PID_VEL_X_KD = 0.0
 PID_VEL_X_KFF = 0.0
 
 # Velocity Y PID
-PID_VEL_Y_KP = 25.0
-PID_VEL_Y_KI = 1.0
+PID_VEL_Y_KP = 100.0
+PID_VEL_Y_KI = 3.0
 PID_VEL_Y_KD = 0.0
 PID_VEL_Y_KFF = 0.0
 
 # Velocity Z PID
-PID_VEL_Z_KP = 22.0
+PID_VEL_Z_KP = 75.0
 PID_VEL_Z_KI = 15.0
-PID_VEL_Z_KD = 0.0
+PID_VEL_Z_KD = 2.0
 PID_VEL_Z_KFF = 0.0
 
 # Velocity limits for attitude output

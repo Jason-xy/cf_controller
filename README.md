@@ -82,10 +82,18 @@ force, torque = controller.compute(state)  # [16, 3] tensors
 ```
 
 ### 2. Runtime Gain Tuning
+Loops that can be tuned on the fly (keys → PID):
+- `roll_rate`, `pitch_rate`, `yaw_rate`
+- `roll`, `pitch`, `yaw`
+- `vel_x`, `vel_y`, `vel_z`
+- `pos_x`, `pos_y`, `pos_z`
+
+Each accepts `kp`, `ki`, `kd`, optional `kff` and `i_limit`:
 ```python
 controller.set_gains({
     "roll_rate": {"kp": 300.0, "ki": 500.0},
-    "pitch_rate": {"kp": 300.0, "ki": 500.0},
+    "vel_z": {"kp": 28.0, "ki": 18.0},
+    "pos_x": {"kp": 2.2, "ki": 0.15, "kd": 0.02},
 })
 ```
 

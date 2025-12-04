@@ -424,7 +424,10 @@ class CrazyflieController:
         """
         Update PID gains at runtime. Keys supported:
             roll_rate / pitch_rate / yaw_rate / roll / pitch / yaw
-        Each may include kp, ki, kd, i_limit.
+            vel_x / vel_y / vel_z
+            pos_x / pos_y / pos_z
+
+        Each may include kp, ki, kd, kff, i_limit.
         """
         mapping = {
             "roll_rate": self.attitude_controller.pid_roll_rate,
@@ -433,6 +436,12 @@ class CrazyflieController:
             "roll": self.attitude_controller.pid_roll,
             "pitch": self.attitude_controller.pid_pitch,
             "yaw": self.attitude_controller.pid_yaw,
+            "vel_x": self.position_controller.pid_vx,
+            "vel_y": self.position_controller.pid_vy,
+            "vel_z": self.position_controller.pid_vz,
+            "pos_x": self.position_controller.pid_x,
+            "pos_y": self.position_controller.pid_y,
+            "pos_z": self.position_controller.pid_z,
         }
         for name, cfg in params.items():
             pid = mapping.get(name)
@@ -442,6 +451,7 @@ class CrazyflieController:
                 kp=cfg.get("kp"),
                 ki=cfg.get("ki"),
                 kd=cfg.get("kd"),
+                kff=cfg.get("kff"),
             )
             if "i_limit" in cfg and cfg["i_limit"] is not None:
                 pid.set_integral_limit(cfg["i_limit"])
