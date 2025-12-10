@@ -9,6 +9,12 @@ bloat and accidental drift.
 # =============================================================================
 # Physical constants
 # =============================================================================
+# Gravity (m/s^2)
+GRAVITY = 9.81
+
+# Drone mass (kg)
+# NOTE: This may vary with battery and attachments. Measure for sim2real.
+CF_MASS = 0.0393  # kg (CF2.1 BL with guards, 350mAh battery, LH deck)
 
 # Arm length from center to motor (m). Should match the real airframe.
 ARM_LENGTH = 0.050  # CF2.1 BL uses 0.050m, standard CF2 uses 0.046m
@@ -19,6 +25,13 @@ THRUST_MAX = 0.2
 
 # Thrust-to-torque coefficient (N*m / N)
 THRUST2TORQUE = 0.00569278844371417
+
+# Inertia tensor diagonal [Ixx, Iyy, Izz] (kg*m^2)
+# NOTE: Critical for attitude dynamics. Measure or estimate for sim2real.
+# These are typical values for CF2.1 BL - may need calibration
+INERTIA_XX = 1.5e-5  # kg*m^2
+INERTIA_YY = 1.5e-5  # kg*m^2
+INERTIA_ZZ = 3.0e-5  # kg*m^2
 
 # =============================================================================
 # Timing
