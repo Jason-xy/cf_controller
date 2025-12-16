@@ -88,6 +88,14 @@ class CrazyflieController:
         # Step counter for rate limiting
         self.step_counter = 0
 
+        # Cached outer-loop outputs (position/velocity -> attitude/thrust)
+        self._outer_roll_cmd = torch.zeros(num_envs, device=device)
+        self._outer_pitch_cmd = torch.zeros(num_envs, device=device)
+        self._outer_thrust_cmd = torch.zeros(num_envs, device=device)
+
+        # Accumulator to trigger low-rate updates (start "full" so first compute updates immediately)
+        self._outer_time_acc = self.position_dt
+
         # Debug storage for external tools (opt-in to avoid per-step clones)
         self.last_debug = {}
 
@@ -128,6 +136,10 @@ class CrazyflieController:
             else:
                 self.yaw_setpoint.zero_()
             self.step_counter = 0
+            self._outer_roll_cmd.zero_()
+            self._outer_pitch_cmd.zero_()
+            self._outer_thrust_cmd.zero_()
+            self._outer_time_acc = self.position_dt
         else:
             self.control_mode[env_ids] = ControlMode.ATTITUDE
             self.attitude_setpoint[env_ids] = 0.0
@@ -139,6 +151,9 @@ class CrazyflieController:
                 self.yaw_setpoint[env_ids] = attitude[env_ids, 2]
             else:
                 self.yaw_setpoint[env_ids] = 0.0
+            self._outer_roll_cmd[env_ids] = 0.0
+            self._outer_pitch_cmd[env_ids] = 0.0
+            self._outer_thrust_cmd[env_ids] = 0.0
 
     def set_attitude_setpoint(
         self,
@@ -279,6 +294,13 @@ class CrazyflieController:
         pitch = attitude[:, 1]
         yaw = attitude[:, 2]
 
+        # Low-frequency scheduler for outer loops (position/velocity)
+        self._outer_time_acc += self.attitude_dt
+        outer_due = False
+        if self._outer_time_acc + 1e-9 >= self.position_dt:
+            outer_due = True
+            self._outer_time_acc -= self.position_dt
+
         # Initialize attitude and thrust setpoints
         roll_des = self.attitude_setpoint[:, 0].clone()
         pitch_des = self.attitude_setpoint[:, 1].clone()
@@ -301,17 +323,21 @@ class CrazyflieController:
             # Position mode - all axes in position control
             mode_position = torch.ones(self.num_envs, 3, dtype=torch.bool, device=self.device)
 
-            roll_pos, pitch_pos, thrust_pos = self.position_controller.update(
-                position, velocity, yaw,
-                self.position_setpoint,
-                self.velocity_setpoint,
-                mode_position
-            )
+            if outer_due:
+                roll_pos, pitch_pos, thrust_pos = self.position_controller.update(
+                    position, velocity, yaw,
+                    self.position_setpoint,
+                    self.velocity_setpoint,
+                    mode_position
+                )
+                self._outer_roll_cmd = torch.where(pos_mode_mask, roll_pos, self._outer_roll_cmd)
+                self._outer_pitch_cmd = torch.where(pos_mode_mask, pitch_pos, self._outer_pitch_cmd)
+                self._outer_thrust_cmd = torch.where(pos_mode_mask, thrust_pos, self._outer_thrust_cmd)
 
-            # Apply to environments in position mode
-            roll_des = torch.where(pos_mode_mask, roll_pos, roll_des)
-            pitch_des = torch.where(pos_mode_mask, pitch_pos, pitch_des)
-            thrust = torch.where(pos_mode_mask, thrust_pos, thrust)
+            # Apply cached outputs to environments in position mode
+            roll_des = torch.where(pos_mode_mask, self._outer_roll_cmd, roll_des)
+            pitch_des = torch.where(pos_mode_mask, self._outer_pitch_cmd, pitch_des)
+            thrust = torch.where(pos_mode_mask, self._outer_thrust_cmd, thrust)
 
         # --- Velocity Control ---
         vel_mode_mask = self.control_mode == ControlMode.VELOCITY
@@ -326,16 +352,20 @@ class CrazyflieController:
             # Velocity mode - all axes in velocity control
             mode_position = torch.zeros(self.num_envs, 3, dtype=torch.bool, device=self.device)
 
-            roll_vel, pitch_vel, thrust_vel = self.position_controller.update(
-                position, velocity, yaw,
-                self.position_setpoint,  # Not used in velocity mode
-                self.velocity_setpoint,
-                mode_position
-            )
+            if outer_due:
+                roll_vel, pitch_vel, thrust_vel = self.position_controller.update(
+                    position, velocity, yaw,
+                    self.position_setpoint,  # Not used in velocity mode
+                    self.velocity_setpoint,
+                    mode_position
+                )
+                self._outer_roll_cmd = torch.where(vel_mode_mask, roll_vel, self._outer_roll_cmd)
+                self._outer_pitch_cmd = torch.where(vel_mode_mask, pitch_vel, self._outer_pitch_cmd)
+                self._outer_thrust_cmd = torch.where(vel_mode_mask, thrust_vel, self._outer_thrust_cmd)
 
-            roll_des = torch.where(vel_mode_mask, roll_vel, roll_des)
-            pitch_des = torch.where(vel_mode_mask, pitch_vel, pitch_des)
-            thrust = torch.where(vel_mode_mask, thrust_vel, thrust)
+            roll_des = torch.where(vel_mode_mask, self._outer_roll_cmd, roll_des)
+            pitch_des = torch.where(vel_mode_mask, self._outer_pitch_cmd, pitch_des)
+            thrust = torch.where(vel_mode_mask, self._outer_thrust_cmd, thrust)
 
         # --- Attitude Control ---
         att_mode_mask = self.control_mode == ControlMode.ATTITUDE

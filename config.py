@@ -38,22 +38,22 @@ INERTIA_ZZ = 3.0e-5  # kg*m^2
 # =============================================================================
 
 # Controller update timesteps
-ATTITUDE_UPDATE_DT = 1.0 / 150.0  # 150 Hz attitude loop
-POSITION_UPDATE_DT = 1.0 / 150.0  # 150 Hz position loop
+ATTITUDE_UPDATE_DT = 1.0 / 300.0  # 300 Hz attitude loop
+POSITION_UPDATE_DT = 1.0 / 100.0  # 100 Hz position loop
 
 # =============================================================================
 # Attitude Rate PID Gains (inner loop)
 # =============================================================================
 
-PID_ROLL_RATE_KP = 250.0
+PID_ROLL_RATE_KP = 1000.0
 PID_ROLL_RATE_KI = 500.0
-PID_ROLL_RATE_KD = 0.05
+PID_ROLL_RATE_KD = 0.0
 PID_ROLL_RATE_KFF = 0.0
 PID_ROLL_RATE_INTEGRATION_LIMIT = 33.3
 
-PID_PITCH_RATE_KP = 250.0
+PID_PITCH_RATE_KP = 1000.0
 PID_PITCH_RATE_KI = 500.0
-PID_PITCH_RATE_KD = 0.05
+PID_PITCH_RATE_KD = 0.0
 PID_PITCH_RATE_KFF = 0.0
 PID_PITCH_RATE_INTEGRATION_LIMIT = 33.3
 
@@ -67,19 +67,19 @@ PID_YAW_RATE_INTEGRATION_LIMIT = 166.7
 # Attitude PID Gains (outer loop)
 # =============================================================================
 
-PID_ROLL_KP = 20.0
+PID_ROLL_KP = 50.0
 PID_ROLL_KI = 3.0
 PID_ROLL_KD = 0.0
 PID_ROLL_KFF = 0.0
 PID_ROLL_INTEGRATION_LIMIT = 20.0
 
-PID_PITCH_KP = 20.0
+PID_PITCH_KP = 50.0
 PID_PITCH_KI = 3.0
 PID_PITCH_KD = 0.0
 PID_PITCH_KFF = 0.0
 PID_PITCH_INTEGRATION_LIMIT = 20.0
 
-PID_YAW_KP = 6.0
+PID_YAW_KP = 15.0
 PID_YAW_KI = 1.0
 PID_YAW_KD = 0.35
 PID_YAW_KFF = 0.0
