@@ -38,7 +38,7 @@ INERTIA_ZZ = 3.0e-5  # kg*m^2
 # =============================================================================
 
 # Controller update timesteps
-ATTITUDE_UPDATE_DT = 1.0 / 300.0  # 300 Hz attitude loop
+ATTITUDE_UPDATE_DT = 1.0 / 500.0  # 300 Hz attitude loop
 POSITION_UPDATE_DT = 1.0 / 100.0  # 100 Hz position loop
 
 # =============================================================================
