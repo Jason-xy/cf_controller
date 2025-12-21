@@ -14,14 +14,15 @@ GRAVITY = 9.81
 
 # Drone mass (kg)
 # NOTE: This may vary with battery and attachments. Measure for sim2real.
-CF_MASS = 0.0393  # kg (CF2.1 BL with guards, 350mAh battery, LH deck)
+# CF_MASS = 0.0393  # kg (CF2.1 BL with guards, 350mAh battery, LH deck)
+CF_MASS = 0.050  # kg
 
 # Arm length from center to motor (m). Should match the real airframe.
 ARM_LENGTH = 0.050  # CF2.1 BL uses 0.050m, standard CF2 uses 0.046m
 
 # Thrust per motor (N)
 THRUST_MIN = 0.02136263065537499
-THRUST_MAX = 0.2
+THRUST_MAX = 0.4
 
 # Thrust-to-torque coefficient (N*m / N)
 THRUST2TORQUE = 0.00569278844371417
@@ -29,9 +30,9 @@ THRUST2TORQUE = 0.00569278844371417
 # Inertia tensor diagonal [Ixx, Iyy, Izz] (kg*m^2)
 # NOTE: Critical for attitude dynamics. Measure or estimate for sim2real.
 # These are typical values for CF2.1 BL - may need calibration
-INERTIA_XX = 1.5e-5  # kg*m^2
-INERTIA_YY = 1.5e-5  # kg*m^2
-INERTIA_ZZ = 3.0e-5  # kg*m^2
+INERTIA_XX = 2.16e-5  # kg*m^2
+INERTIA_YY = 2.16e-5  # kg*m^2
+INERTIA_ZZ = 4.33e-5  # kg*m^2
 
 # =============================================================================
 # Timing
@@ -67,13 +68,13 @@ PID_YAW_RATE_INTEGRATION_LIMIT = 166.7
 # Attitude PID Gains (outer loop)
 # =============================================================================
 
-PID_ROLL_KP = 10.0
+PID_ROLL_KP = 12.0
 PID_ROLL_KI = 3.0
 PID_ROLL_KD = 0.0
 PID_ROLL_KFF = 0.0
 PID_ROLL_INTEGRATION_LIMIT = 20.0
 
-PID_PITCH_KP = 10.0
+PID_PITCH_KP = 12.0
 PID_PITCH_KI = 3.0
 PID_PITCH_KD = 0.0
 PID_PITCH_KFF = 0.0
