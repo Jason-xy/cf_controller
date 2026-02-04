@@ -40,7 +40,7 @@ INERTIA_ZZ = 4.33e-5  # kg*m^2
 
 # Controller update timesteps
 ATTITUDE_UPDATE_DT = 1.0 / 100.0  # 100 Hz attitude loop
-POSITION_UPDATE_DT = 1.0 / 100.0  # 100 Hz position loop
+POSITION_UPDATE_DT = 1.0 / 25.0  # 25 Hz position loop
 
 # =============================================================================
 # Attitude Rate PID Gains (inner loop)
