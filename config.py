@@ -39,8 +39,8 @@ INERTIA_ZZ = 4.33e-5  # kg*m^2
 # =============================================================================
 
 # Controller update timesteps
-ATTITUDE_UPDATE_DT = 1.0 / 500.0  # 300 Hz attitude loop
-POSITION_UPDATE_DT = 1.0 / 100.0  # 100 Hz position loop
+ATTITUDE_UPDATE_DT = 1.0 / 200.0  # 200 Hz attitude loop
+POSITION_UPDATE_DT = 1.0 / 50.0  # 50 Hz position loop
 
 # =============================================================================
 # Attitude Rate PID Gains (inner loop)
@@ -68,19 +68,19 @@ PID_YAW_RATE_INTEGRATION_LIMIT = 166.7
 # Attitude PID Gains (outer loop)
 # =============================================================================
 
-PID_ROLL_KP = 12.0
+PID_ROLL_KP = 15.0
 PID_ROLL_KI = 3.0
 PID_ROLL_KD = 0.0
 PID_ROLL_KFF = 0.0
 PID_ROLL_INTEGRATION_LIMIT = 20.0
 
-PID_PITCH_KP = 12.0
+PID_PITCH_KP = 15.0
 PID_PITCH_KI = 3.0
 PID_PITCH_KD = 0.0
 PID_PITCH_KFF = 0.0
 PID_PITCH_INTEGRATION_LIMIT = 20.0
 
-PID_YAW_KP = 3.0
+PID_YAW_KP = 5.0
 PID_YAW_KI = 1.0
 PID_YAW_KD = 0.35
 PID_YAW_KFF = 0.0
